@@ -15,12 +15,11 @@ class Unit:
     __W_O = 2.251 * 10 ** 9
     __T_W = 5387
     __M = 2
-    __PHI_CC = 0
-    __PHI_EE = 0
+    __PHI_CC = .3
+    __PHI_EE = .6
 
     def __init__(self, i, j, temperature=295, carbon_dioxide=80, pore_water_potential=-1.2,
-                 es_water_potential=-.5, conductance=.18, pore_water_vapor=27, es_water_vapor=28, ambient_temp=296,
-                 ambient_water=.05, ambient_carbon=400, total_intensity=1, blue_intensity=1, k_ae=50, chi=.15):
+                 es_water_potential=-.5, conductance=.18, pore_water_vapor=27, es_water_vapor=28, k_ae=50, chi=.15):
         self.__row = i
         self.__col = j
         self.__temperature = temperature
@@ -30,12 +29,6 @@ class Unit:
         self.__pore_vapor = pore_water_vapor
         self.__es_vapor = es_water_vapor
         self.__es_potential = es_water_potential
-        self.__ambient_temp = ambient_temp
-        self.__ambient_water = ambient_water
-        self.__ambient_carbon = ambient_carbon
-        self.__total_intensity = total_intensity
-        self.__blue_intensity = blue_intensity
-        self.__absorbed_intensity = .9 * total_intensity
         self.__k_ae = k_ae
         self.__chi = chi
         self.guard = Guard()
@@ -89,42 +82,6 @@ class Unit:
     def set_es_water_vapor(self, water_vapor):
         self.__es_vapor = water_vapor
 
-    def get_ambient_temperature(self):
-        return self.__ambient_temp
-
-    def set_ambient_temperature(self, temp):
-        self.__ambient_temp = temp
-
-    def get_ambient_water(self):
-        return self.__ambient_water
-
-    def set_ambient_water(self, water):
-        self.__ambient_water = water
-
-    def get_ambient_carbon(self):
-        return self.__ambient_carbon
-
-    def set_ambient_carbon(self, carbon):
-        self.__ambient_carbon = carbon
-
-    def get_total_intensity(self):
-        return self.__total_intensity
-
-    def set_total_intensity(self, intensity):
-        self.__total_intensity = intensity
-
-    def get_blue_intensity(self):
-        return self.__blue_intensity
-
-    def set_blue_intensity(self, intensity):
-        self.__blue_intensity = intensity
-
-    def get_absorbed_intensity(self):
-        return self.__absorbed_intensity
-
-    def set_absorbed_intensity(self):
-        self.__absorbed_intensity = .65 * self.__total_intensity
-
     def set_k_ae(self, k_ae):
         self.__k_ae = k_ae
 
@@ -167,10 +124,11 @@ class Unit:
                                   (average_water - self.epid.get_epid_water_potential()))
 
     # Equation 1
-    def solve_for_temperature(self, p):
+    def solve_for_temperature(self, p, *data):
         x, y = p
-        return (x - self.__ambient_temp - (self.__absorbed_intensity - self.__LATENT_HEAT * self.__conductance *
-                                           (y - self.__ambient_water)) / (2 * self.__k_ae), y - self.__W_O *
+        temp, absorbed, water = data
+        return (x - temp - (absorbed - self.__LATENT_HEAT * self.__conductance *
+                                           (y - water)) / (2 * self.__k_ae), y - self.__W_O *
                 exp(-self.__T_W / x))
 
     def calculate_next(self, average_water, step=1):
