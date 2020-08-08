@@ -4,7 +4,7 @@ class Environment:
         self.humid = amb_humid
         self.carbon = amb_carbon
         self.total_intensity = total
-        self.blue = percent * total
+        self.blue = (percent / 100) * total
 
     def get_ambient_temperature(self):
         return self.temp
@@ -15,8 +15,8 @@ class Environment:
     def get_ambient_water(self):
         return self.humid
 
-    def set_ambient_water(self, temp):
-        self.temp = temp
+    def set_ambient_water(self, humid):
+        self.humid = humid
 
     def get_ambient_carbon(self):
         return self.carbon
@@ -34,7 +34,7 @@ class Environment:
         return self.blue
 
     def set_blue_intensity(self, blue):
-        self.blue = blue
+        self.blue = (blue / 100) * self.total_intensity
 
 
 

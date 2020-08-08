@@ -1,7 +1,7 @@
 class Guard:
     __GAMMA_GO = 525
-    __ALPHA_B = .1
-    __ALPHA_G = .8
+    __ALPHA_B = .05
+    __ALPHA_G = .6
     __K_B = 20
     __K_GO = 100
     __R = 8.314

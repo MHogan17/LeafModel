@@ -1,8 +1,9 @@
 from Array import Array
 from Environment import Environment
 from ArrayPainter import paint_array
-import os
+from statistics import stdev
 import time
+from openpyxl import Workbook
 
 def ExperimentFactory(name):
     if name == 'light':
@@ -17,42 +18,85 @@ def ExperimentFactory(name):
 
 class Experiment:
     def __init__(self):
-        self.array = Array()
         self.environment = Environment()
+        self.workbook = Workbook()
 
     def run(self):
         raise(RuntimeError("'run' is not defined for this experiment type"))
 
-    def save(self):
-        save = input("Would you like to save the experiment?")
-        if save.lower() == 'y':
-            pass
-        else:
-            pass
+    def record_data(self, t, array):
+        ws = self.workbook.active
+
+        ws['A1'] = 'Time'
+        ws['B1'] = 'Mean Temp'
+        ws['C1'] = 'Std dev'
+        ws['D1'] = 'Average WUE'
+        ws['E1'] = 'Std dev'
+
+        temp = []
+        wue = []
+        for i in range(len(array)):
+            for unit in array[i]:
+                temp.append(unit.get_temperature())
+                wue.append(self.environment.get_ambient_carbon() - unit.get_carbon_dioxide() /
+                           (unit.get_es_water_vapor() - self.environment.get_ambient_water()))
+
+        avg_temp = sum(temp) / len(temp)
+        avg_wue = sum(wue) / len(wue)
+
+        ws['A' + str(t + 2)] = t
+        ws['B' + str(t + 2)] = avg_temp
+        ws['C' + str(t + 2)] = stdev(temp)
+        ws['D' + str(t + 2)] = avg_wue
+        ws['E' + str(t + 2)] = stdev(wue)
+        self.workbook.save("Data.xlsx")
 
 
 class Light(Experiment):
     def run(self):
         start = time.time()
         self.environment.set_total_intensity(0)
-        self.array.randomize()
-        t = 0
-        while t < 5:
-            self.array.calculate_next(t, self.environment)
-            paint_array(self.array, str(t))
-            t += 1
-        self.environment.set_total_intensity(700)
         self.environment.set_blue_intensity(0)
-        while t < 30:
-            self.array.calculate_next(t, self.environment)
-            paint_array(self.array, str(t))
+        array = Array()
+        water = Array()
+        wheel = {}
+        array.randomize()
+        t = 0
+        while t < 350:
+            if t < 7:
+                wheel[t] = Array()
+                array.calculate_next(self.environment, water, wheel[t % 7])
+            else:
+                array.calculate_next(self.environment, water, wheel[(t - 6) % 7])
+            paint_array(array, str(t))
+            self.record_data(t, array)
+            if t == 20:
+                self.environment.set_total_intensity(800)
+            if t == 200:
+                self.environment.set_blue_intensity(5)
+
             t += 1
         end = time.time()
         runtime = end - start
         print("This simulation took " + str(round(runtime / 60)) + " minutes.")
-        #self.save()
 
 
 class Humidity(Experiment):
     def run(self):
-        print("This is a humidity experiment.")
+        start = time.time()
+        self.environment.set_total_intensity(800)
+        self.environment.set_blue_intensity(0)
+        self.environment.set_ambient_water(20)
+        self.array.randomize()
+        t = 0
+        while t < 350:
+            self.array.calculate_next(t, self.environment)
+            paint_array(self.array, str(t))
+            self.record_data(t)
+            if t == 50:
+                self.environment.set_ambient_water(10)
+
+            t += 1
+        end = time.time()
+        runtime = end - start
+        print("This simulation took " + str(round(runtime / 60)) + " minutes.")

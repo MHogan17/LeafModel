@@ -1,7 +1,7 @@
 class Epidermal:
-    __GAMMA_EO = 100
+    __GAMMA_EO = 125
     __ALPHA_E = 0
-    __K_EO = 1
+    __K_EO = 70
     __R = 8.314
 
     def __init__(self, pressure=.2, signal=0.001, water=-.04):

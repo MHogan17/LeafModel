@@ -10,16 +10,16 @@ class Unit:
     __SIGMA = 0.01
     __R_INT = .1
     __LAMBDA_G = .1
-    __LAMBDA_E = 1.6
+    __LAMBDA_E = 1.1
     __LATENT_HEAT = 40.8
     __W_O = 2.251 * 10 ** 9
     __T_W = 5387
     __M = 2
-    __PHI_CC = .3
-    __PHI_EE = .6
+    __PHI_CC = .5
+    __PHI_EE = .7
 
     def __init__(self, i, j, temperature=295, carbon_dioxide=80, pore_water_potential=-1.2,
-                 es_water_potential=-.5, conductance=.18, pore_water_vapor=27, es_water_vapor=28, k_ae=50, chi=.15):
+                 es_water_potential=-.5, conductance=.18, pore_water_vapor=27, es_water_vapor=28, k_ae=50, chi=.235):
         self.__row = i
         self.__col = j
         self.__temperature = temperature
@@ -101,7 +101,7 @@ class Unit:
     # Equation 3
     def calculate_carbon_dioxide(self, total_intensity, ambient_carbon, average_carbon):
         return self.__conductance * ambient_carbon + average_carbon * self.__PHI_CC / \
-               (self.__conductance + self.__K_C * total_intensity + self.__PHI_CC) + .0001
+               (self.__conductance + self.__K_C * total_intensity + self.__PHI_CC)
 
     # Equation 8
     def calculate_pore_water_vapor(self, ambient_water):
@@ -143,7 +143,7 @@ class Unit:
         # Equation 14
         new_cond = self.__chi * (self.guard.get_guard_pressure() - self.__M * self.epid.get_epid_pressure())
         if new_cond <= 0:
-            self.set_conductance(0.00000001)
+            self.set_conductance(0)
         elif new_cond >= 1:
             self.set_conductance(1)
         else:
