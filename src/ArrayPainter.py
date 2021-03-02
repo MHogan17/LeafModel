@@ -12,10 +12,9 @@ def paint_array(array, time):
         for j in range(len(array[i])):
             color = array.find_color(i, j)
             photo.put(color, (i, j))
-            window.update()
 
+    window.update()
     photo.write('data/Minute ' + time + '.png', 'png')
-    print(time, flush=True)
+    print(time)
     window.destroy()
     return
-

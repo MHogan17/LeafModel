@@ -17,9 +17,10 @@ class Unit:
     __M = 2
     __PHI_CC = .5
     __PHI_EE = .7
+    __K_AE = 50
 
     def __init__(self, i, j, temperature=295, carbon_dioxide=80, pore_water_potential=-1.2,
-                 es_water_potential=-.5, conductance=.18, pore_water_vapor=27, es_water_vapor=28, k_ae=50, chi=.235):
+                 es_water_potential=-.5, conductance=.18, pore_water_vapor=27, es_water_vapor=28, chi=.235):
         self.__row = i
         self.__col = j
         self.__temperature = temperature
@@ -29,7 +30,6 @@ class Unit:
         self.__pore_vapor = pore_water_vapor
         self.__es_vapor = es_water_vapor
         self.__es_potential = es_water_potential
-        self.__k_ae = k_ae
         self.__chi = chi
         self.guard = Guard()
         self.epid = Epidermal()
@@ -82,12 +82,6 @@ class Unit:
     def set_es_water_vapor(self, water_vapor):
         self.__es_vapor = water_vapor
 
-    def set_k_ae(self, k_ae):
-        self.__k_ae = k_ae
-
-    def get_k_ae(self):
-        return self.__k_ae
-
     def get_chi(self):
         return self.__chi
 
@@ -127,9 +121,8 @@ class Unit:
     def solve_for_temperature(self, p, *data):
         x, y = p
         temp, absorbed, water = data
-        return (x - temp - (absorbed - self.__LATENT_HEAT * self.__conductance *
-                                           (y - water)) / (2 * self.__k_ae), y - self.__W_O *
-                exp(-self.__T_W / x))
+        return (x - temp - (absorbed - self.__LATENT_HEAT * self.__conductance * (y - water)) / (2 * self.__K_AE),
+                y - self.__W_O * exp(-self.__T_W / x))
 
     def calculate_next(self, average_water, step=1):
         # Equation 12
@@ -154,4 +147,3 @@ class Unit:
 
     def __float__(self):
         return float(self.__conductance)
-

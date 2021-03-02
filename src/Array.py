@@ -6,7 +6,7 @@ from scipy.optimize import fsolve
 
 class Array:
     def __init__(self, length=100, width=100):
-        self.temp_grad = Gradient(1000)
+        self.temp_grad = Gradient(400)
         self.array = []
         self.length = length
         self.width = width
@@ -44,14 +44,14 @@ class Array:
     def find_color(self, i, j):
         temp = int(self.array[i][j].get_temperature() * 1000)
 
-        if temp < 295000:
+        if temp < 298000:
             return self.temp_grad[0]
-        elif temp > 305000:
+        elif temp >= 302000:
             return self.temp_grad[len(self.temp_grad) - 1]
         else:
-            return self.temp_grad[(temp - 295000) // 10]
+            return self.temp_grad[(temp - 298000) // 10]
 
-    def calculate_next(self, environment, water, carbon):
+    def calculate_next(self, environment, water, carbon, current_time):
         neighbors_water = []
         neighbors_carbon = []
 
@@ -88,7 +88,13 @@ class Array:
                 average_water = sum(neighbors_water) / len(neighbors_water)
 
                 unit.calculate_next(average_water)
-                data = (environment.get_ambient_temperature(), environment.get_total_intensity() * 0.6,
+                '''
+                if i < 50 and current_time > 20:
+                    environment.set_total_intensity(100)
+                elif i > 50 and current_time > 20:
+                    environment.set_total_intensity(800)'''
+
+                data = (environment.get_ambient_temperature(), environment.get_total_intensity() * 0.7,
                         environment.get_ambient_water())
                 x, y = fsolve(unit.solve_for_temperature, (296, 30), args=data)
                 unit.set_temperature(x)
@@ -123,11 +129,3 @@ class Array:
 
     def __len__(self):
         return len(self.array)
-
-
-
-
-
-
-
-
